@@ -605,7 +605,7 @@ body{
   </div><!-- /frame-outer -->
 
   <!-- controls -->
-  <div class="controls">
+  <div class="controls" id="cameraControls" style="display:none">
     <input type="text" class="title-field" id="sTitle" placeholder="Name this stamp…" maxlength="24">
 
     <!-- Live: big snap button + upload fallback -->
@@ -632,6 +632,22 @@ body{
 </div><!-- /device -->
 
 <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+
+
+<!-- ══ PREVIEW ══ -->
+<div class="collection-screen" id="previewScreen">
+  <div class="col-header">
+    <div class="col-header-title">New Stamp</div>
+    <button class="col-close" onclick="backToCamera()">✕ Back</button>
+  </div>
+  <div class="col-grid-wrap" style="text-align:center">
+    <div id="previewStamp"></div>
+    <input type="text" class="title-field" id="previewTitle" placeholder="Name this stamp…" maxlength="24">
+    <div class="btn-row" style="margin-top:10px;justify-content:center">
+      <button class="btn btn-primary" onclick="saveFromPreview()">Add to Collection</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ COLLECTION ══ -->
 <div class="collection-screen" id="colScreen">
@@ -665,9 +681,9 @@ let camStream=null, captured=null, cutting=false, activeId=null;
 
 init();
 function init(){
-  updateBadge();
-  setLed('amber');
-  startCameraInstant();
+updateBadge();
+setLed('amber');
+startCameraInstant();
 }
 
 // ── LED ──
@@ -675,10 +691,10 @@ function setLed(c){const l=document.getElementById('led');l.className='led-dot';
 
 // ── WINDOW TAP: snap if live, otherwise retry camera ──
 function windowTap(e){
-  if(cutting || captured) return;
-  if(camStream){
-    doSnap(e);
-  }
+  if(cutting||captured) return;
+  if(camStream){ doSnap(e); return; }
+  showRipple(e);
+  startCameraInstant();
 }
 
 function showRipple(e){
@@ -693,47 +709,6 @@ function showRipple(e){
   setTimeout(()=>{r.style.display='none';},500);
 }
 
-
-async function startCameraInstant(){
-  const v = document.getElementById('video');
-
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    fallbackToUpload();
-    return;
-  }
-
-  try{
-    setLed('amber');
-
-    camStream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode: "environment" }
-    });
-
-    v.srcObject = camStream;
-    v.style.display = 'block';
-
-    document.getElementById('vfIdle').style.display = 'none';
-    document.getElementById('snapCv').style.display = 'none';
-
-    setLed('green');
-    ctrl('Live');
-
-  }catch(err){
-    fallbackToUpload();
-  }
-}
-
-function fallbackToUpload(){
-  document.getElementById('vfIdle').style.display = 'flex';
-  document.getElementById('vfIdle').innerHTML = `
-    <div style="text-align:center">
-      <div style="font-size:12px;margin-bottom:6px;">Camera unavailable</div>
-      <div style="font-size:10px;opacity:.6;">Use upload button</div>
-    </div>
-  `;
-  ctrl('Live');
-  setLed('red');
-}
 // ── CAMERA ──
 async function tryCamera(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ ctrl('Live'); pickFile(); return; }
@@ -861,7 +836,7 @@ function runCut(src){
     document.getElementById('emergeWrap').classList.remove('show');
     cc.innerHTML='';
     cutting=false;
-    ctrl('Prev');
+    openPreview();
     setLed('green');
   },1650);
 }
@@ -963,6 +938,51 @@ function stampSVG(src, value, W=200, H=180){
     fill="none" stroke="#c8b060" stroke-width="0.5" opacity="0.4"/>
 </g>
 </svg>`;
+}
+
+
+function openPreview(){
+  document.getElementById('previewScreen').classList.add('open');
+  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
+  document.getElementById('previewStamp').innerHTML=stampSVG(captured,denom,260,208);
+}
+
+function saveFromPreview(){
+  if(!captured) return;
+
+  const title=document.getElementById('previewTitle').value.trim()||'Untitled';
+  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
+
+  stamps.unshift({
+    id:Date.now(),
+    title,
+    date:new Date().toISOString(),
+    image:captured,
+    value:denom,
+    rot:+(Math.random()*10-5).toFixed(1)
+  });
+
+  localStorage.setItem('sb4',JSON.stringify(stamps));
+
+  captured=null;
+  document.getElementById('previewTitle').value='';
+
+  updateBadge();
+
+  closePreview();
+  startCameraInstant();
+}
+
+function closePreview(){
+ document.getElementById('previewScreen').classList.remove('open');
+}
+
+function backToCamera(){
+ closePreview();
+ captured=null;
+ document.getElementById('snapCv').style.display='none';
+ document.getElementById('vfIdle').style.display='flex';
+ startCameraInstant();
 }
 
 // ── COLLECTION ──
