@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Stampbook</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Courier+Prime:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Courier+Prime:wght@400;700&family=DM+Sans:wght@300;400;500&family=Caveat:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html{background:#d8d8d8;}
+html{background:#d8d0c4;}
 body{
   width:100%;min-height:100vh;
   overflow-y:auto;overflow-x:hidden;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-family:'DM Sans',sans-serif;
-  background: radial-gradient(ellipse at 40% 30%, #f0f0f0, #d0d0d0);
-  padding: 24px 16px 40px;
+  background: radial-gradient(ellipse at 50% 40%, #ece8e0, #cfc8bc);
+  padding: 32px 16px 40px;
 }
 
 /* ── THE DEVICE SHELL ── */
@@ -116,48 +116,43 @@ body{
   padding:3px;
 }
 
-/* ── STAMP WINDOW — the aperture with serrated edges ── */
+/* ── STAMP WINDOW — simple rounded rect viewfinder ── */
 .stamp-window{
   position:relative;
   width:100%;
   aspect-ratio: 5/4;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
-  background:#b8bcc4;  /* bezel grey shows around the stamp shape */
-  border-radius:4px;
+  background:#b8bcc4;
+  border-radius:10px;
   overflow:hidden;
 }
 
-/* The media (video/canvas) fills the whole window; clip-path cuts it to stamp shape */
 .stamp-media{
   position:absolute;inset:0;
   width:100%;height:100%;
-  clip-path: url(#stampClip);
 }
 .stamp-media video,
 .stamp-media canvas{
   width:100%;height:100%;object-fit:cover;display:block;
 }
 
-/* Idle placeholder — same clip */
 .vf-idle{
   position:absolute;inset:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:8px;background:#c8cdd6;z-index:2;
+  gap:6px;background:#c8cdd6;
   width:100%;height:100%;
 }
-.vf-idle-icon{ width:44px;height:44px;opacity:.45; }
 .vf-idle-text{
-  font-family:'Courier Prime',monospace;font-size:11px;
-  letter-spacing:1px;color:#7a8090;text-align:center;
-  text-transform:uppercase;opacity:.7;
+  font-family:'DM Sans',sans-serif;font-size:11px;
+  letter-spacing:1px;color:#8090a0;text-align:center;
+  text-transform:uppercase;
 }
 
-/* The die SVG: sits on top, draws ONLY the border/bevel/perf ring over the video — fully transparent in the centre */
+/* Die ring overlay — sits on top, transparent in centre */
 .stamp-die-svg{
   position:absolute;inset:0;width:100%;height:100%;
   pointer-events:none;z-index:4;
-  overflow:visible;
 }
 
 /* Tap ripple */
@@ -344,72 +339,208 @@ body{
 
 #fileInput{display:none;}
 
-/* ── COLLECTION FULLSCREEN ── */
+/* ── JOURNAL COLLECTION SCREEN ── */
+
 .collection-screen{
   position:fixed;inset:0;z-index:50;
-  background:#f0f0f0;
   display:none;flex-direction:column;
   overflow:hidden;
-  -webkit-overflow-scrolling:touch;
+  /* aged journal paper */
+  background: #f5efe0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(180,160,120,0.18) 31px,
+      rgba(180,160,120,0.18) 32px
+    );
 }
 .collection-screen.open{display:flex;}
 
-.col-header{
-  background:#fff;border-bottom:1px solid #e0e0e0;
-  padding:16px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-.col-header-title{
-  font-family:'Playfair Display',serif;font-size:18px;color:#1a1a1a;letter-spacing:1px;
-}
-.col-close{
-  background:none;border:1px solid #ddd;border-radius:20px;
-  font-size:11px;font-family:'DM Sans',sans-serif;
-  color:#888;padding:5px 12px;cursor:pointer;letter-spacing:.5px;
+/* Left margin line like a real journal */
+.collection-screen::before{
+  content:'';
+  position:fixed;
+  left:52px;top:0;bottom:0;width:1px;
+  background:rgba(200,120,100,0.25);
+  z-index:1;pointer-events:none;
 }
 
-.col-grid-wrap{flex:1;overflow-y:auto;padding:20px 16px;-webkit-overflow-scrolling:touch;}
-.stamps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px 14px;}
+/* ── JOURNAL HEADER ── */
+.col-header{
+  position:relative;z-index:2;
+  padding:20px 20px 12px 24px;
+  background:transparent;
+  border-bottom:none;
+  flex-shrink:0;
+}
+.col-header-inner{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding-left:36px; /* clear margin line */
+}
+.col-header-date{
+  font-family:'Caveat',cursive;
+  font-size:13px;color:#b08060;
+  margin-bottom:2px;letter-spacing:.5px;
+}
+.col-header-title{
+  font-family:'Caveat',cursive;
+  font-size:32px;font-weight:700;
+  color:#3a2a18;
+  line-height:1;letter-spacing:-.5px;
+}
+.col-header-subtitle{
+  font-family:'Lora',serif;
+  font-style:italic;font-size:12px;
+  color:#a08060;margin-top:4px;
+}
+.col-close{
+  background:none;border:none;cursor:pointer;
+  font-family:'Caveat',cursive;font-size:15px;
+  color:#b08060;padding:4px 8px;
+  border-bottom:1px solid #c8a880;
+  margin-top:6px;
+}
+.col-close:hover{color:#7a4a28;}
+
+/* ── JOURNAL BODY / GRID ── */
+.col-grid-wrap{
+  flex:1;overflow-y:auto;
+  padding:16px 20px 40px 60px; /* 60px to clear margin line */
+  -webkit-overflow-scrolling:touch;
+  position:relative;z-index:2;
+}
+
+/* Decorative top flourish */
+.journal-flourish{
+  font-family:'Caveat',cursive;
+  font-size:12px;color:#c8a060;
+  letter-spacing:3px;text-align:center;
+  margin-bottom:20px;opacity:.6;
+}
+
+.stamps-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:28px 18px;
+}
 
 .stamp-item{
   cursor:pointer;
-  animation:sIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  animation:sIn .45s cubic-bezier(.34,1.56,.64,1) both;
   transition:transform .2s,filter .2s;
+  position:relative;
 }
-.stamp-item:active{transform:scale(.96) !important;}
-@keyframes sIn{from{opacity:0;transform:scale(.55) rotate(-8deg);}to{opacity:1;}}
-.stamp-label{text-align:center;margin-top:5px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Playfair Display',serif;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.stamp-date{text-align:center;font-size:9px;color:#aaa;margin-top:1px;}
+.stamp-item:active{transform:scale(.96) rotate(0deg) !important;}
+@keyframes sIn{from{opacity:0;transform:scale(.5) rotate(-10deg);}to{opacity:1;}}
 
-.empty-col{text-align:center;padding:60px 20px;color:#bbb;grid-column:1/-1;}
-.empty-col p{font-size:14px;font-style:italic;}
+/* Washi tape accent on random stamps */
+.stamp-item:nth-child(3n+1)::before{
+  content:'';position:absolute;
+  top:-8px;left:50%;transform:translateX(-50%) rotate(-2deg);
+  width:40px;height:14px;
+  background:rgba(210,180,140,0.55);
+  border-radius:2px;z-index:10;
+}
+.stamp-item:nth-child(3n+2)::before{
+  content:'';position:absolute;
+  top:-8px;left:50%;transform:translateX(-50%) rotate(1.5deg);
+  width:36px;height:14px;
+  background:rgba(180,210,200,0.5);
+  border-radius:2px;z-index:10;
+}
+.stamp-item:nth-child(3n)::before{
+  content:'';position:absolute;
+  top:-8px;left:50%;transform:translateX(-50%) rotate(-1deg);
+  width:38px;height:14px;
+  background:rgba(220,180,180,0.5);
+  border-radius:2px;z-index:10;
+}
 
-/* ── MODAL ── */
+.stamp-label{
+  text-align:center;margin-top:6px;
+  font-family:'Caveat',cursive;font-size:15px;font-weight:600;
+  color:#5a3a20;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.stamp-date{
+  text-align:center;font-family:'Lora',serif;
+  font-style:italic;font-size:10px;color:#b09070;margin-top:1px;
+}
+
+.empty-col{text-align:center;padding:60px 20px;color:#c0a880;grid-column:1/-1;}
+.empty-col-icon{font-size:32px;margin-bottom:10px;opacity:.5;}
+.empty-col p{
+  font-family:'Caveat',cursive;font-size:20px;color:#b09060;
+}
+.empty-col small{
+  display:block;margin-top:6px;
+  font-family:'Lora',serif;font-style:italic;
+  font-size:12px;color:#c8b090;
+}
+
+/* Page curl bottom-right decorative */
+.collection-screen::after{
+  content:'';
+  position:fixed;bottom:0;right:0;
+  width:40px;height:40px;
+  background:linear-gradient(225deg,#ddd0b8 45%,transparent 46%);
+  pointer-events:none;z-index:3;
+}
+
+/* ── JOURNAL MODAL ── */
 .modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  position:fixed;inset:0;
+  background:rgba(58,42,24,0.55);
   display:flex;align-items:center;justify-content:center;
   z-index:100;padding:24px;
-  animation:fi .2s;backdrop-filter:blur(4px);
+  animation:fi .2s;
+  backdrop-filter:blur(3px);
 }
 .modal-bg.hidden{display:none;}
 @keyframes fi{from{opacity:0}to{opacity:1}}
+
 .modal-card{
-  background:#fff;border-radius:20px;padding:20px;
+  background:#fdf7ec;
+  border-radius:4px;padding:24px 20px 20px;
   max-width:280px;width:100%;
-  box-shadow:0 20px 60px rgba(0,0,0,0.25);
   position:relative;
+  /* notebook paper shadow */
+  box-shadow:
+    2px 3px 0 #e8d8b8,
+    4px 6px 0 #d8c8a8,
+    0 20px 50px rgba(58,42,24,0.3);
+  /* top binding tape */
 }
+.modal-card::before{
+  content:'';
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:48px;height:18px;
+  background:rgba(210,180,140,0.7);
+  border-radius:2px;
+}
+
 .modal-close-btn{
-  position:absolute;top:12px;right:12px;
-  width:28px;height:28px;border-radius:50%;
-  background:#f0f0f0;border:none;cursor:pointer;
-  font-size:16px;color:#888;display:flex;align-items:center;justify-content:center;
+  position:absolute;top:10px;right:10px;
+  background:none;border:none;cursor:pointer;
+  font-family:'Caveat',cursive;font-size:20px;
+  color:#c0a070;line-height:1;padding:0 4px;
 }
-.modal-stamp-title{text-align:center;margin-top:10px;font-family:'Playfair Display',serif;font-size:14px;color:#1a1a1a;letter-spacing:1.5px;}
-.modal-stamp-date{text-align:center;font-size:10px;color:#aaa;margin-top:3px;}
-.modal-actions{display:flex;gap:8px;margin-top:14px;}
-.modal-actions .btn{font-size:11px;}
+.modal-close-btn:hover{color:#7a4a28;}
+
+.modal-stamp-title{
+  text-align:center;margin-top:12px;
+  font-family:'Caveat',cursive;font-size:20px;font-weight:700;
+  color:#3a2a18;letter-spacing:.5px;
+}
+.modal-stamp-date{
+  text-align:center;
+  font-family:'Lora',serif;font-style:italic;
+  font-size:11px;color:#b09060;margin-top:2px;
+}
+.modal-actions{display:flex;gap:8px;margin-top:16px;}
+.modal-actions .btn{font-size:11px;font-family:'Caveat',cursive;font-size:14px;letter-spacing:.5px;}
+
 </style>
 </head>
 <body>
@@ -429,160 +560,16 @@ body{
     <div class="frame-br"></div>
 
     <div class="frame-inner">
-      <!-- Hidden SVG just for the stamp clip-path definition -->
-      <svg width="0" height="0" style="position:absolute">
-        <defs>
-          <clipPath id="stampClip" clipPathUnits="objectBoundingBox">
-            <!-- Stamp shape as a fraction of the element's bounding box (0..1) -->
-            <!-- Outer rect 0,0 → 1,1. Perf holes punched as circles. Even-odd rule. -->
-            <!-- We use a polygon approximation of the perf outline for broad compat -->
-            <!-- Actually use a path with the inner rect and perf circles -->
-            <path fill-rule="evenodd" d="
-              M0.048,0.058 H0.952 V0.942 H0.048 Z
-              M0.085,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.135,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.185,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.235,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.285,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.335,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.385,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.435,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.485,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.535,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.585,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.635,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.685,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.735,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.785,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.835,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.885,0.058 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.085,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.135,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.185,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.235,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.285,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.335,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.385,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.435,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.485,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.535,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.585,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.635,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.685,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.735,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.785,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.835,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.885,0.942 a0.019,0.024,0,1,0,0.038,0 a0.019,0.024,0,1,0,-0.038,0
-              M0.048,0.085 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.135 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.185 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.235 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.285 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.335 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.385 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.435 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.485 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.535 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.585 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.635 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.685 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.735 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.785 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.835 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.048,0.885 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.085 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.135 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.185 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.235 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.285 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.335 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.385 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.435 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.485 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.535 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.585 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.635 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.685 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.735 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.785 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.835 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-              M0.952,0.885 a0.024,0.019,0,1,0,0,0.038 a0.024,0.019,0,1,0,0,-0.038
-            "/>
-          </clipPath>
-        </defs>
-      </svg>
-
-      <!-- the stamp window -->
+      <!-- the stamp window — simple rounded rect viewfinder -->
       <div class="stamp-window" id="stampWindow" onclick="windowTap(event)">
 
-        <!-- media layer — clipped to stamp shape via CSS clip-path -->
         <div class="stamp-media" id="stampMedia">
           <div class="vf-idle" id="vfIdle">
-            <svg class="vf-idle-icon" viewBox="0 0 44 44" fill="none" stroke="#7a8090" stroke-width="1.3">
-              <rect x="4" y="8" width="36" height="28" rx="4"/>
-              <circle cx="15" cy="18" r="3"/>
-              <path d="M4 30l9-8 7 7 5-5 10 9"/>
-              <circle cx="30" cy="12" r="5" fill="#7a8090" opacity=".12"/>
-              <line x1="30" y1="9.5" x2="30" y2="14.5" stroke="#7a8090" stroke-width="1.5"/>
-              <line x1="27.5" y1="12" x2="32.5" y2="12" stroke="#7a8090" stroke-width="1.5"/>
-            </svg>
             <div class="vf-idle-text">Tap to snap</div>
           </div>
           <video id="video" autoplay playsinline muted style="display:none;width:100%;height:100%;object-fit:cover;"></video>
           <canvas id="snapCv" style="display:none;width:100%;height:100%;object-fit:cover;"></canvas>
         </div>
-
-        <!-- Die SVG overlay: ONLY draws the decorative perf ring and bevel. Centre is fully transparent so video shows through. -->
-        <svg class="stamp-die-svg" viewBox="0 0 260 208" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <mask id="ringMask">
-              <!-- Show the entire rect... -->
-              <rect width="260" height="208" fill="white"/>
-              <!-- ...except the inner stamp aperture (leave transparent so video shows) -->
-              <rect x="17" y="17" width="226" height="174" fill="black"/>
-            </mask>
-          </defs>
-          <!-- Grey border ring (only outside the stamp aperture, perf teeth included) -->
-          <rect width="260" height="208" fill="#b2b7bf" mask="url(#ringMask)"/>
-          <!-- Perf tooth highlights along the aperture edge -->
-          <g fill="#c8ccd4">
-            <!-- top row -->
-            <circle cx="31" cy="17" r="5"/><circle cx="44" cy="17" r="5"/>
-            <circle cx="57" cy="17" r="5"/><circle cx="70" cy="17" r="5"/>
-            <circle cx="83" cy="17" r="5"/><circle cx="96" cy="17" r="5"/>
-            <circle cx="109" cy="17" r="5"/><circle cx="122" cy="17" r="5"/>
-            <circle cx="135" cy="17" r="5"/><circle cx="148" cy="17" r="5"/>
-            <circle cx="161" cy="17" r="5"/><circle cx="174" cy="17" r="5"/>
-            <circle cx="187" cy="17" r="5"/><circle cx="200" cy="17" r="5"/>
-            <circle cx="213" cy="17" r="5"/><circle cx="226" cy="17" r="5"/>
-            <!-- bottom row -->
-            <circle cx="31" cy="191" r="5"/><circle cx="44" cy="191" r="5"/>
-            <circle cx="57" cy="191" r="5"/><circle cx="70" cy="191" r="5"/>
-            <circle cx="83" cy="191" r="5"/><circle cx="96" cy="191" r="5"/>
-            <circle cx="109" cy="191" r="5"/><circle cx="122" cy="191" r="5"/>
-            <circle cx="135" cy="191" r="5"/><circle cx="148" cy="191" r="5"/>
-            <circle cx="161" cy="191" r="5"/><circle cx="174" cy="191" r="5"/>
-            <circle cx="187" cy="191" r="5"/><circle cx="200" cy="191" r="5"/>
-            <circle cx="213" cy="191" r="5"/><circle cx="226" cy="191" r="5"/>
-            <!-- left col -->
-            <circle cx="17" cy="31" r="5"/><circle cx="17" cy="44" r="5"/>
-            <circle cx="17" cy="57" r="5"/><circle cx="17" cy="70" r="5"/>
-            <circle cx="17" cy="83" r="5"/><circle cx="17" cy="96" r="5"/>
-            <circle cx="17" cy="109" r="5"/><circle cx="17" cy="122" r="5"/>
-            <circle cx="17" cy="135" r="5"/><circle cx="17" cy="148" r="5"/>
-            <circle cx="17" cy="161" r="5"/><circle cx="17" cy="174" r="5"/>
-            <!-- right col -->
-            <circle cx="243" cy="31" r="5"/><circle cx="243" cy="44" r="5"/>
-            <circle cx="243" cy="57" r="5"/><circle cx="243" cy="70" r="5"/>
-            <circle cx="243" cy="83" r="5"/><circle cx="243" cy="96" r="5"/>
-            <circle cx="243" cy="109" r="5"/><circle cx="243" cy="122" r="5"/>
-            <circle cx="243" cy="135" r="5"/><circle cx="243" cy="148" r="5"/>
-            <circle cx="243" cy="161" r="5"/><circle cx="243" cy="174" r="5"/>
-          </g>
-          <!-- bevel shadow inside aperture edge -->
-          <rect x="17" y="17" width="226" height="174" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
-          <rect x="18.5" y="18.5" width="223" height="171" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
-        </svg>
 
         <!-- blades + flash + confetti -->
         <div class="blades-wrap" id="bladesWrap">
@@ -605,7 +592,7 @@ body{
   </div><!-- /frame-outer -->
 
   <!-- controls -->
-  <div class="controls" id="cameraControls" style="display:none">
+  <div class="controls">
     <input type="text" class="title-field" id="sTitle" placeholder="Name this stamp…" maxlength="24">
 
     <!-- Live: big snap button + upload fallback -->
@@ -633,29 +620,20 @@ body{
 
 <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
 
-
-<!-- ══ PREVIEW ══ -->
-<div class="collection-screen" id="previewScreen">
-  <div class="col-header">
-    <div class="col-header-title">New Stamp</div>
-    <button class="col-close" onclick="backToCamera()">✕ Back</button>
-  </div>
-  <div class="col-grid-wrap" style="text-align:center">
-    <div id="previewStamp"></div>
-    <input type="text" class="title-field" id="previewTitle" placeholder="Name this stamp…" maxlength="24">
-    <div class="btn-row" style="margin-top:10px;justify-content:center">
-      <button class="btn btn-primary" onclick="saveFromPreview()">Add to Collection</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ COLLECTION ══ -->
+<!-- ══ JOURNAL COLLECTION ══ -->
 <div class="collection-screen" id="colScreen">
   <div class="col-header">
-    <div class="col-header-title">My Collection</div>
-    <button class="col-close" onclick="closeCollection()">✕ Close</button>
+    <div class="col-header-inner">
+      <div>
+        <div class="col-header-date" id="journalDate"></div>
+        <div class="col-header-title">My Stamps</div>
+        <div class="col-header-subtitle">a personal collection of moments</div>
+      </div>
+      <button class="col-close" onclick="closeCollection()">← back</button>
+    </div>
   </div>
   <div class="col-grid-wrap">
+    <div class="journal-flourish">✦ &nbsp; &nbsp; ✦ &nbsp; &nbsp; ✦</div>
     <div class="stamps-grid" id="grid"></div>
   </div>
 </div>
@@ -680,11 +658,7 @@ let stamps=JSON.parse(localStorage.getItem('sb4')||'[]');
 let camStream=null, captured=null, cutting=false, activeId=null;
 
 init();
-function init(){
-updateBadge();
-setLed('amber');
-startCameraInstant();
-}
+function init(){ updateBadge(); setLed('amber'); tryCamera(); }
 
 // ── LED ──
 function setLed(c){const l=document.getElementById('led');l.className='led-dot';if(c)l.classList.add(c);}
@@ -694,7 +668,7 @@ function windowTap(e){
   if(cutting||captured) return;
   if(camStream){ doSnap(e); return; }
   showRipple(e);
-  startCameraInstant();
+  tryCamera();
 }
 
 function showRipple(e){
@@ -751,7 +725,7 @@ function doSnap(e){
   runCut(captured);
 }
 
-function retake(){ captured=null; document.getElementById('snapCv').style.display='none'; document.getElementById('vfIdle').style.display='flex'; ctrl('Live'); startCameraInstant(); }
+function retake(){ captured=null; document.getElementById('snapCv').style.display='none'; document.getElementById('vfIdle').style.display='flex'; ctrl('Live'); tryCamera(); }
 
 function pickFile(){
   const fi=document.getElementById('fileInput');
@@ -796,8 +770,7 @@ function runCut(src){
   cutting=true;
   setLed('red');
 
-  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
-  document.getElementById('emergeStamp').innerHTML=stampSVG(src,denom,220,176);
+  document.getElementById('emergeStamp').innerHTML=stampSVG(src,220,220);
 
   // spawn confetti
   const cc=document.getElementById('confetti');
@@ -836,7 +809,7 @@ function runCut(src){
     document.getElementById('emergeWrap').classList.remove('show');
     cc.innerHTML='';
     cutting=false;
-    openPreview();
+    ctrl('Prev');
     setLed('green');
   },1650);
 }
@@ -846,8 +819,7 @@ function saveStamp(){
   if(!captured)return;
   const title=document.getElementById('sTitle').value.trim()||'Untitled';
   const rot=+(Math.random()*10-5).toFixed(1);
-  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
-  stamps.unshift({id:Date.now(),title,date:new Date().toISOString(),image:captured,value:denom,rot});
+  stamps.unshift({id:Date.now(),title,date:new Date().toISOString(),image:captured,rot});
   localStorage.setItem('sb4',JSON.stringify(stamps));
   captured=null;
   document.getElementById('sTitle').value='';
@@ -856,25 +828,17 @@ function saveStamp(){
   updateBadge();
   openCollection();
   // restart camera in background for next shot
-  startCameraInstant();
+  tryCamera();
 }
 
 function updateBadge(){document.getElementById('colBadge').textContent=stamps.length;}
 
-// ── STAMP SVG ──
-// Layout: perf border=10px, photo fills top, label band=28px at bottom, all inside clip
-// Text sits at y = H - 10 (well inside the perforated border which is only 10px)
-function stampSVG(src, value, W=200, H=180){
-  const perf = 5;       // perf hole radius
-  const step = 12;      // spacing between perf centres
-  const pad  = 10;      // inner padding from perf edge to content
-  const lh   = 28;      // label band height at bottom
-  const iX = pad, iY = pad;
-  const iW = W - pad*2;
-  const iH = H - pad*2 - lh;   // photo height
+// ── STAMP SVG — photo fills entire stamp, no text ──
+function stampSVG(src, W=200, H=200){
+  const perf = 5;
+  const step = 12;
   const uid = 's' + Math.random().toString(36).slice(2,8);
 
-  // Perf holes as arc paths (even-odd cuts them out of the stamp rect)
   function perfPaths(){
     let d = '';
     const hole = (cx,cy,r) =>
@@ -884,110 +848,23 @@ function stampSVG(src, value, W=200, H=180){
     return d;
   }
 
-  // Text baseline: centred in the label band
-  const textY = iY + iH + lh/2 + 4;   // midpoint of label band + small optical adjustment
-
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;display:block;overflow:visible;">
 <defs>
   <clipPath id="sc_${uid}">
     <path fill-rule="evenodd" d="M0,0 H${W} V${H} H0 Z ${perfPaths()}"/>
   </clipPath>
-  <clipPath id="ic_${uid}">
-    <rect x="${iX}" y="${iY}" width="${iW}" height="${iH}" rx="1"/>
-  </clipPath>
 </defs>
 <g clip-path="url(#sc_${uid})">
-  <!-- aged paper background -->
-  <rect width="${W}" height="${H}" fill="#f2eacc"/>
-
-  <!-- photo -->
-  <image href="${src}" x="${iX}" y="${iY}" width="${iW}" height="${iH}"
-    clip-path="url(#ic_${uid})" preserveAspectRatio="xMidYMid slice"/>
-
-  <!-- thin rule separating photo from label -->
-  <line x1="${iX}" y1="${iY+iH+1}" x2="${iX+iW}" y2="${iY+iH+1}"
-    stroke="#c0a860" stroke-width="0.6" opacity="0.6"/>
-
-  <!-- photo frame -->
-  <rect x="${iX}" y="${iY}" width="${iW}" height="${iH}"
-    fill="none" stroke="#b0924a" stroke-width="0.7" rx="1"/>
-
-  <!-- STAMPBOOK label — centred -->
-  <text x="${W/2}" y="${textY}"
-    text-anchor="middle"
-    font-family="'Courier Prime',Courier,monospace"
-    font-size="8" letter-spacing="2.5" fill="#6a4e28" opacity="0.85">STAMPBOOK</text>
-
-  <!-- denomination — right aligned -->
-  <text x="${W - pad - 2}" y="${textY}"
-    text-anchor="end"
-    font-family="Georgia,'Playfair Display',serif"
-    font-weight="700" font-size="11" fill="#b03020">${value}</text>
-
-  <!-- faint postmark -->
-  <g opacity="0.1" transform="translate(${pad+4},${iY+4})">
-    <circle cx="13" cy="13" r="12" stroke="#1a1208" stroke-width="1.4" fill="none"/>
-    <circle cx="13" cy="13" r="7"  stroke="#1a1208" stroke-width="0.7" fill="none"/>
-    <line x1="2" y1="13" x2="24" y2="13" stroke="#1a1208" stroke-width="1.1"/>
-    <line x1="2" y1="10" x2="24" y2="10" stroke="#1a1208" stroke-width="0.5"/>
-    <line x1="2" y1="16" x2="24" y2="16" stroke="#1a1208" stroke-width="0.5"/>
-  </g>
-
-  <!-- outer border -->
-  <rect x="1.5" y="1.5" width="${W-3}" height="${H-3}"
-    fill="none" stroke="#c8b060" stroke-width="0.5" opacity="0.4"/>
+  <!-- photo stretched to fill entire stamp -->
+  <image href="${src}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
 </g>
 </svg>`;
-}
-
-
-function openPreview(){
-  document.getElementById('previewScreen').classList.add('open');
-  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
-  document.getElementById('previewStamp').innerHTML=stampSVG(captured,denom,260,208);
-}
-
-function saveFromPreview(){
-  if(!captured) return;
-
-  const title=document.getElementById('previewTitle').value.trim()||'Untitled';
-  const denom=DENOMS[Math.floor(Math.random()*DENOMS.length)];
-
-  stamps.unshift({
-    id:Date.now(),
-    title,
-    date:new Date().toISOString(),
-    image:captured,
-    value:denom,
-    rot:+(Math.random()*10-5).toFixed(1)
-  });
-
-  localStorage.setItem('sb4',JSON.stringify(stamps));
-
-  captured=null;
-  document.getElementById('previewTitle').value='';
-
-  updateBadge();
-
-  closePreview();
-  startCameraInstant();
-}
-
-function closePreview(){
- document.getElementById('previewScreen').classList.remove('open');
-}
-
-function backToCamera(){
- closePreview();
- captured=null;
- document.getElementById('snapCv').style.display='none';
- document.getElementById('vfIdle').style.display='flex';
- startCameraInstant();
 }
 
 // ── COLLECTION ──
 function openCollection(){
   document.getElementById('colScreen').classList.add('open');
+  document.getElementById('journalDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   renderGrid();
 }
 function closeCollection(){document.getElementById('colScreen').classList.remove('open');}
@@ -995,10 +872,14 @@ function closeCollection(){document.getElementById('colScreen').classList.remove
 function renderGrid(){
   const g=document.getElementById('grid');
   const list=[...stamps].sort((a,b)=>b.id-a.id);
-  if(!list.length){g.innerHTML=`<div class="empty-col"><p>No stamps yet — snap your first!</p></div>`;return;}
+  if(!list.length){g.innerHTML=`<div class="empty-col">
+    <div class="empty-col-icon">📮</div>
+    <p>No stamps yet</p>
+    <small>snap your first photo to begin</small>
+  </div>`;return;}
   g.innerHTML=list.map((s,i)=>`
     <div class="stamp-item" style="transform:rotate(${s.rot}deg);animation-delay:${i*.05}s;filter:drop-shadow(1px 3px 8px rgba(0,0,0,0.18))" onclick="openModal(${s.id})">
-      ${stampSVG(s.image,s.value)}
+      ${stampSVG(s.image)}
       <div class="stamp-label">${s.title}</div>
       <div class="stamp-date">${fmtDate(s.date)}</div>
     </div>`).join('');
@@ -1010,7 +891,7 @@ function fmtDate(iso){return new Date(iso).toLocaleDateString('en-US',{month:'sh
 function openModal(id){
   activeId=id;
   const s=stamps.find(x=>x.id===id);if(!s)return;
-  document.getElementById('modalStamp').innerHTML=`<div style="filter:drop-shadow(0 6px 16px rgba(0,0,0,.15))">${stampSVG(s.image,s.value,260,208)}</div>`;
+  document.getElementById('modalStamp').innerHTML=`<div style="filter:drop-shadow(0 6px 16px rgba(0,0,0,.15))">${stampSVG(s.image,260,260)}</div>`;
   document.getElementById('modalTitle').textContent=s.title.toUpperCase();
   document.getElementById('modalDate').textContent=fmtDate(s.date);
   document.getElementById('modal').classList.remove('hidden');
@@ -1027,18 +908,9 @@ function delStamp(){
 
 function dlStamp(){
   const s=stamps.find(x=>x.id===activeId);if(!s)return;
-  const W=480,H=400,cv=document.createElement('canvas');
-  cv.width=W;cv.height=H;
-  const ctx=cv.getContext('2d'),img=new Image();
-  img.onload=()=>{
-    ctx.fillStyle='#f0e8c8';ctx.beginPath();ctx.roundRect(0,0,W,H,8);ctx.fill();
-    const p=24;ctx.drawImage(img,p,p,W-p*2,H-p*2-36);
-    ctx.strokeStyle='#a09050';ctx.lineWidth=.8;ctx.beginPath();ctx.roundRect(p,p,W-p*2,H-p*2-36,2);ctx.stroke();
-    ctx.fillStyle='#c0321e';ctx.font='bold 14px serif';ctx.textAlign='right';ctx.fillText(s.value,W-p,H-8);
-    ctx.fillStyle='#1a1208';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(s.title.toUpperCase(),W/2,H-8);
-    const a=document.createElement('a');a.download=`stamp-${s.title.replace(/\s+/g,'-').toLowerCase()}.png`;a.href=cv.toDataURL('image/png');a.click();
-  };
-  img.src=s.image;
+  const a=document.createElement('a');
+  a.download=`stamp-${s.title.replace(/\s+/g,'-').toLowerCase()}.jpg`;
+  a.href=s.image;a.click();
 }
 </script>
 </body>
